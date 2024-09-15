@@ -3,7 +3,7 @@ fragment_size: 100
 device: CUDA:0
 engine: tensor
 multiprocessing: false
-path_dataset: ''
+path_dataset: 'realsense'
 depth_folder: depth
 color_folder: color
 path_intrinsic: ''

@@ -236,9 +236,9 @@ class ReconstructionWindow:
         self.widget3d.scene.scene.add_geometry('points', pcd_placeholder, mat)
 
         self.model = o3d.t.pipelines.slam.Model(
-            voxel_size=self.voxel_size_slider.double_value, block_resolution=16,
-            block_count=self.est_block_count_slider.int_value, transformation=o3c.Tensor(np.eye(4)),
-            device=o3c.Device(self.config.device))
+            self.voxel_size_slider.double_value, 16,
+            self.est_block_count_slider.int_value, o3c.Tensor(np.eye(4)),
+            o3c.Device(self.config.device))
         self.is_started = True
 
         set_enabled(self.fixed_prop_grid, False)
@@ -429,6 +429,31 @@ class ReconstructionWindow:
 
 if __name__ == '__main__':
     parser = ConfigParser()
+    """ 얘가 default_config.yml을 읽어서 config를 만들어줌
+`--config` 인자를 추가할 때 `is_config_file=True` 옵션을 사용했기 때문에 해당 파일을 자동으로 읽어오는 것
+이 동작은 일반적인 `argparse` 라이브러리에서는 제공되지 않으며, 확장 라이브러리인 `configargparse`에서 제공하는 기능
+
+### 1. **`configargparse`의 동작 원리**
+- `configargparse`는 `argparse`와 호환되지만, 설정 파일을 직접 읽고 처리할 수 있는 기능을 제공
+- `parser.add(..., is_config_file=True)`는 `configargparse`를 사용하여 설정 파일을 지정할 수 있는 인자를 정의
+- 실행 파일과 같은 경로에 `default_config.yml`이 있는 경우, `configargparse`는 해당 파일을 자동으로 찾고 읽어들임
+
+### 2. **자동으로 설정 파일을 읽는 원리**
+`configargparse`는 기본적으로 설정 파일을 자동으로 로드하는 동작을 갖고 있으며, 다음과 같은 원리로 동작합니다:
+
+#### 2.1. `is_config_file=True` 옵션
+- `is_config_file=True`를 사용하면 `configargparse`는 해당 인자를 설정 파일로 인식합니다. 
+    - 즉, 이 인자를 통해 설정 파일의 경로를 받아들이는 역할을 합니다.
+- `--config` 인자를 명령줄에서 명시하지 않더라도, 
+    - `configargparse`는 실행 파일의 경로를 기반으로 `default_config.yml`과 같은 일반적인 파일 이름을 자동으로 찾습니다.
+
+#### 2.2. 내부 파일 검색 및 로드
+- `configargparse`는 `ArgumentParser`가 생성될 때, 
+    - `default_config_files`와 현재 경로에 있는 파일들을 함께 검색하여 설정 파일이 있는지 확인합니다.
+- 파일 이름이 `default_config.yml`과 같이 일반적으로 많이 쓰이는 이름인 경우, 자동으로 이를 설정 파일로 인식하여 읽어들이는 기능을 제공
+    """
+    # /home/hsb/PycharmProjects/Open3D/examples/python/t_reconstruction_system/config.py
+    # 위 경로에서 기본 설설정 파일을 "default_config.yml"로 지정해놨음
     parser.add(
         '--config',
         is_config_file=True,

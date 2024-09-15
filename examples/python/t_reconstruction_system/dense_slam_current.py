@@ -102,7 +102,8 @@ if __name__ == '__main__':
     if not os.path.exists(config.path_npz):
         """ TODO
         - depth image 와 color image 에 요구되는 포맷을 알아야 함
-          - 예를 들어, sync 라던지, depth image의 format 이라던지
+          - depth를 rgb에 sync 맞춰서 저장하고 있음.
+          - rgb: 8-bit JPG (rs.format.bgr8) -> 즉 파일에는 bgr 순서로 저장되어 있음
           - depth: 16-bit JPG ( 각 값은 mm 단위로 표현됨)
         - intrinsic 이 요구되는 포맷을 알아야 함
         
@@ -111,6 +112,8 @@ if __name__ == '__main__':
           - 제공되는 dataset 을 보면 알 수 있겠다.
             - http://redwood-data.org/indoor/dataset.html
         """
+
+
         """ TODO: config
 name: Default reconstruction system config
 fragment_size: 100
