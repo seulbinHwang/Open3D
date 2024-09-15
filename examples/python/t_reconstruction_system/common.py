@@ -19,12 +19,22 @@ from warnings import warn
 
 
 def extract_rgbd_frames(rgbd_video_file):
-    """
-    Extract color and aligned depth frames and intrinsic calibration from an
-    RGBD video file (currently only RealSense bag files supported). Folder
-    structure is:
-        <directory of rgbd_video_file/<rgbd_video_file name without extension>/
-            {depth/00000.jpg,color/00000.png,intrinsic.json}
+    """ ros2 bag 파일을 읽어들이는데 -> 특정 형식을 갖춘 ros2 bag 파일만 지원하는듯 ( TODO: 확인 필요 )
+    RGB-D 비디오 파일(현재는 RealSense 카메라로 촬영된 .bag 파일만 지원)을 읽어들여 프레임과 보정 정보(내부 파라미터)를 추출
+
+    <rgbd_video_file의 디렉토리>/<rgbd_video_file의 이름>/
+        ├── depth/00000.jpg
+        ├── color/00000.png
+        ├── intrinsic.json
+
+    함수는 3가지 값을 반환
+        - frames_folder: 추출된 프레임이 저장된 폴더 경로
+        - path_intrinsic: 카메라의 내부 파라미터가 저장된 JSON 파일 경로
+        - depth_scale: 카메라의 깊이 스케일 값
+
+    RGB-D 비디오 파일에서 컬러와 정렬된 깊이 프레임, 그리고 내재된 카메라 보정 정보(intrinsic calibration)를 추출
+    현재는 RealSense 카메라의 .bag 파일만 지원한다고 명시
+
     """
     frames_folder = join(dirname(rgbd_video_file),
                          basename(splitext(rgbd_video_file)[0]))
@@ -113,6 +123,13 @@ def load_depth_file_names(config):
 
 
 def load_rgbd_file_names(config):
+    """
+    이 함수는 config 객체를 사용하여 데이터셋에서 컬러 및 깊이 이미지 파일들의 경로를 가져옵니다.
+    먼저, 깊이 이미지 파일들의 경로를 가져옵니다.
+    그다음 컬러 이미지가 있는지 확인하고,
+        만약 깊이 이미지와 컬러 이미지의 개수가 동일하면 파일 경로들을 반환
+    깊이 이미지와 컬러 이미지의 수가 맞지 않으면 오류 메시지를 출력하고 빈 리스트를 반환합니다.
+    """
     depth_file_names = load_depth_file_names(config)
     if len(depth_file_names) == 0:
         return [], []
@@ -132,6 +149,12 @@ def load_rgbd_file_names(config):
 
 
 def load_intrinsic(config, key='depth'):
+    """ TODO: read_pinhole_camera_intrinsic 함수에 맞는 "path_intrinsic" (json) 파일 형식을 알아내야 함
+    이 함수는 config 객체와 선택적 매개변수 key를 사용하여 카메라 보정 정보의 경로를 가져옵니다.
+    내부 보정 정보 파일이 없다면 기본적인 카메라 보정 정보를 생성합니다.
+    카메라 보정 정보를 legacy 또는 tensor 형식에 따라 반환합니다.
+
+    """
     path_intrinsic = config.path_color_intrinsic if key == 'color' else config.path_intrinsic
 
     if path_intrinsic is None or path_intrinsic == '':

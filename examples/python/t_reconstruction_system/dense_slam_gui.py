@@ -9,6 +9,7 @@
 
 # P.S. This example is used in documentation, so, please ensure the changes are
 # synchronized.
+# "pip install numpy==1.24.3" to avoid "Segmentation Fault" error
 
 import open3d as o3d
 import open3d.core as o3c
@@ -34,18 +35,16 @@ class ReconstructionWindow:
 
     def __init__(self, config, font_id):
         self.config = config
-
         self.window = gui.Application.instance.create_window(
             'Open3D - Reconstruction', 1280, 800)
-
         w = self.window
         em = w.theme.font_size
+
 
         spacing = int(np.round(0.25 * em))
         vspacing = int(np.round(0.5 * em))
 
         margins = gui.Margins(vspacing)
-
         # First panel
         self.panel = gui.Vert(spacing, margins)
 
@@ -59,7 +58,6 @@ class ReconstructionWindow:
         self.scale_slider.int_value = int(config.depth_scale)
         self.fixed_prop_grid.add_child(scale_label)
         self.fixed_prop_grid.add_child(self.scale_slider)
-
         voxel_size_label = gui.Label('Voxel size')
         self.voxel_size_slider = gui.Slider(gui.Slider.DOUBLE)
         self.voxel_size_slider.set_limits(0.003, 0.01)
@@ -80,7 +78,6 @@ class ReconstructionWindow:
         self.est_block_count_slider.int_value = config.block_count
         self.fixed_prop_grid.add_child(est_block_count_label)
         self.fixed_prop_grid.add_child(self.est_block_count_slider)
-
         est_point_count_label = gui.Label('Est. points')
         self.est_point_count_slider = gui.Slider(gui.Slider.INT)
         self.est_point_count_slider.set_limits(500000, 8000000)
@@ -115,7 +112,6 @@ class ReconstructionWindow:
         self.diff_slider.double_value = config.odometry_distance_thr
         self.adjustable_prop_grid.add_child(diff_label)
         self.adjustable_prop_grid.add_child(self.diff_slider)
-
         ### Update surface?
         update_label = gui.Label('Update surface?')
         self.update_box = gui.Checkbox('')
@@ -131,7 +127,6 @@ class ReconstructionWindow:
         self.adjustable_prop_grid.add_child(self.raycast_box)
 
         set_enabled(self.fixed_prop_grid, True)
-
         ## Application control
         b = gui.ToggleSwitch('Resume/Pause')
         b.set_on_clicked(self._on_switch)
@@ -148,7 +143,6 @@ class ReconstructionWindow:
         tab1.add_fixed(vspacing)
         tab1.add_child(self.input_depth_image)
         tabs.add_tab('Input images', tab1)
-
         ### Rendered image tab
         tab2 = gui.Vert(0, tab_margins)
         self.raycast_color_image = gui.ImageWidget()
@@ -176,23 +170,21 @@ class ReconstructionWindow:
 
         # Scene widget
         self.widget3d = gui.SceneWidget()
-
         # FPS panel
         self.fps_panel = gui.Vert(spacing, margins)
         self.output_fps = gui.Label('FPS: 0.0')
         self.fps_panel.add_child(self.output_fps)
-
         # Now add all the complex panels
         w.add_child(self.panel)
         w.add_child(self.widget3d)
         w.add_child(self.fps_panel)
-
         self.widget3d.scene = rendering.Open3DScene(self.window.renderer)
         self.widget3d.scene.set_background([1, 1, 1, 1])
 
+
+
         w.set_on_layout(self._on_layout)
         w.set_on_close(self._on_close)
-
         self.is_done = False
 
         self.is_started = False
@@ -244,9 +236,9 @@ class ReconstructionWindow:
         self.widget3d.scene.scene.add_geometry('points', pcd_placeholder, mat)
 
         self.model = o3d.t.pipelines.slam.Model(
-            self.voxel_size_slider.double_value, 16,
-            self.est_block_count_slider.int_value, o3c.Tensor(np.eye(4)),
-            o3c.Device(self.config.device))
+            voxel_size=self.voxel_size_slider.double_value, block_resolution=16,
+            block_count=self.est_block_count_slider.int_value, transformation=o3c.Tensor(np.eye(4)),
+            device=o3c.Device(self.config.device))
         self.is_started = True
 
         set_enabled(self.fixed_prop_grid, False)
