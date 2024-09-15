@@ -16,6 +16,10 @@ from common import load_rgbd_file_names, load_depth_file_names, save_poses, load
 def read_legacy_rgbd_image(color_file, depth_file, convert_rgb_to_intensity):
     color = o3d.io.read_image(color_file)
     depth = o3d.io.read_image(depth_file)
+    """ create_from_color_and_depth
+    컬러 이미지는 그레이스케일 이미지로 변환되어 [0, 1] 범위의 실수값으로 저장됩니다.
+    깊이 이미지는 실수값으로 저장되며, 미터 단위로 깊이 값을 나타냅니다.
+    """
     rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
         color,
         depth,

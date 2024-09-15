@@ -13,6 +13,13 @@ import pyrealsense2 as rs
 
 
 def get_profiles():
+    """
+    이 함수는 현재 연결된 모든 RealSense 카메라 장치에서
+        컬러와 깊이 스트림에 대한 지원 프로파일(해상도, 프레임 속도, 포맷 등)을 가져와 반환
+    이 정보를 출력하여 사용자가 어떤 프로파일을 사용할지 결정할 수 있게 합니다.
+    반환된 프로파일은 다른 코드에서 카메라의 스트림 설정에 사용될 수 있습니다.
+
+    """
     ctx = rs.context()
     devices = ctx.query_devices()
 

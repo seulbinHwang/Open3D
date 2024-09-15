@@ -52,6 +52,7 @@ def make_clean_folder(path_folder):
 
 
 def save_intrinsic_as_json(filename, frame):
+    """카메라의 내부 보정 정보를 JSON 파일로 저장합니다. """
     intrinsics = frame.profile.as_video_stream_profile().intrinsics
     with open(filename, 'w') as outfile:
         obj = json.dump(
@@ -72,26 +73,25 @@ def save_intrinsic_as_json(filename, frame):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description=
-        "Realsense Recorder. Please select one of the optional arguments")
-    parser.add_argument("--output_folder",
-                        default='../dataset/realsense/',
-                        help="set output folder")
-    parser.add_argument("--record_rosbag",
-                        action='store_true',
-                        help="Recording rgbd stream into realsense.bag")
-    parser.add_argument(
-        "--record_imgs",
-        action='store_true',
-        help="Recording save color and depth images into realsense folder")
-    parser.add_argument("--playback_rosbag",
-                        action='store_true',
-                        help="Play recorded realsense.bag file")
-    args = parser.parse_args()
+        description="Realsense Recorder. Please select one of the optional arguments")
 
-    if sum(o is not False for o in vars(args).values()) != 2:
-        parser.print_help()
-        exit()
+    # 기존 인자 파서 부분에 추가
+    parser.add_argument("--output_folder", default='../dataset/realsense/', help="set output folder")
+    parser.add_argument("--record_rosbag", action='store_true', help="Recording rgbd stream into realsense.bag")
+    parser.add_argument("--record_imgs", action='store_true',
+                        help="Recording save color and depth images into realsense folder")
+    parser.add_argument("--playback_rosbag", action='store_true', help="Play recorded realsense.bag file")
+
+    # 새로운 인자 추가: 해상도 및 프레임 속도 설정
+    parser.add_argument("--width", type=int, default=640, help="Width of the frames")
+    parser.add_argument("--height", type=int, default=480, help="Height of the frames")
+    parser.add_argument("--fps", type=int, default=30, help="Frames per second")
+    parser.add_argument("--max_depth", type=float, default=3.0, help="Maximum depth value in meters to trust")
+    args = parser.parse_args()
+    # if sum(o is not False for o in vars(args).values()) != 2:
+    #     parser.print_help()
+    #     print(f"Please select one of the optional arguments, but not multiple")
+    #     exit()
 
     path_output = args.output_folder
     path_depth = join(args.output_folder, "depth")
@@ -118,14 +118,23 @@ if __name__ == "__main__":
     color_profiles, depth_profiles = get_profiles()
 
     if args.record_imgs or args.record_rosbag:
-        # note: using 640 x 480 depth resolution produces smooth depth boundaries
-        #       using rs.format.bgr8 for color image format for OpenCV based image visualization
-        print('Using the default profiles: \n  color:{}, depth:{}'.format(
-            color_profiles[0], depth_profiles[0]))
-        w, h, fps, fmt = depth_profiles[0]
-        config.enable_stream(rs.stream.depth, w, h, fmt, fps)
-        w, h, fps, fmt = color_profiles[0]
-        config.enable_stream(rs.stream.color, w, h, fmt, fps)
+        # 참고: 640 x 480의 깊이 해상도를 사용하면 부드러운 깊이 경계를 생성할 수 있습니다.
+        #       OpenCV 기반의 이미지 시각화를 위해 색상 이미지 형식으로 rs.format.bgr8 을 사용합니다
+        # for a_color_profile, a_depth_profile in zip(color_profiles, depth_profiles):
+        #     print('Using the profiles: \n  color:{}, depth:{}'.format(
+        #         a_color_profile, a_depth_profile))
+        # print('Using the default profiles: \n  color:{}, depth:{}'.format(
+        #     color_profiles[0], depth_profiles[0]))
+        # w, h, fps, fmt = depth_profiles[0]
+        # config.enable_stream(rs.stream.depth, w, h, fmt, fps)
+        # w, h, fps, fmt = color_profiles[0]
+        # config.enable_stream(rs.stream.color, w, h, fmt, fps)
+        # 깊이 스트림 설정
+        config.enable_stream(rs.stream.depth, args.width, args.height, rs.format.z16, args.fps)
+
+        # 컬러 스트림 설정
+        config.enable_stream(rs.stream.color, args.width, args.height, rs.format.bgr8, args.fps)
+
         if args.record_rosbag:
             config.enable_record_to_file(path_bag)
     if args.playback_rosbag:
@@ -144,7 +153,7 @@ if __name__ == "__main__":
 
     # We will not display the background of objects more than
     #  clipping_distance_in_meters meters away
-    clipping_distance_in_meters = 3  # 3 meter
+    clipping_distance_in_meters = args.max_depth  # 3 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
 
     # Create an align object
