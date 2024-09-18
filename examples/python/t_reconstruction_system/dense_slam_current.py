@@ -112,8 +112,6 @@ if __name__ == '__main__':
           - 제공되는 dataset 을 보면 알 수 있겠다.
             - http://redwood-data.org/indoor/dataset.html
         """
-
-
         """ TODO: config
 name: Default reconstruction system config
 fragment_size: 100

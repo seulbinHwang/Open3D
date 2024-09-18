@@ -40,7 +40,6 @@ class ReconstructionWindow:
         w = self.window
         em = w.theme.font_size
 
-
         spacing = int(np.round(0.25 * em))
         vspacing = int(np.round(0.5 * em))
 
@@ -181,8 +180,6 @@ class ReconstructionWindow:
         self.widget3d.scene = rendering.Open3DScene(self.window.renderer)
         self.widget3d.scene.set_background([1, 1, 1, 1])
 
-
-
         w.set_on_layout(self._on_layout)
         w.set_on_close(self._on_close)
         self.is_done = False
@@ -266,6 +263,32 @@ class ReconstructionWindow:
         return True
 
     def init_render(self, depth_ref, color_ref):
+        """
+        `init_render` 메서드는 초기 렌더링 설정을 담당하며,
+            주로 첫 번째 깊이 이미지와 컬러 이미지를 사용해 3D 장면을 초기화
+        이 메서드는 `Open3D`의 GUI를 활용해 시각화하는데, 다음과 같은 주요 단계로 나눌 수 있습니다:
+
+        1. **깊이 및 컬러 이미지 업데이트:**
+           - 첫 번째로 주어진 깊이 및 컬러 이미지를 사용하여 GUI의 이미지 위젯을 업데이트
+           - 이 작업은 사용자가 처음 GUI를 볼 때 깊이와 컬러 데이터를 시각적으로 확인할 수 있도록
+
+        2. **깊이 데이터 시각화:**
+           - 깊이 이미지는 `colorize_depth`라는 함수를 사용하여 색상으로 변환
+           - 이를 통해 깊이 데이터의 시각적인 표현이 가능
+
+        3. **카메라 설정:**
+           - 가상 카메라의 위치와 뷰포인트를 설정
+           - 이를 위해 축에 정렬된 바운딩 박스(`AxisAlignedBoundingBox`)를 사용하여
+             - 3D 공간의 크기와 위치를 지정하고,
+        - 카메라의 뷰를 중심점으로 이동시켜 사용자가 3D 장면을 적절하게 관찰할 수 있도록 합니다.
+           - 카메라의 시야각을 설정하고 장면의 초기 뷰를 정합니다.
+
+        4. **초기 렌더링 준비:**
+           - 위의 단계에서 설정된 이미지를 GUI에 적용하고, 사용자 인터페이스를 업데이트
+           - 이를 통해 사용자는 첫 번째 프레임을 확인할 수 있고,
+             - 이후 프레임이 추가적으로 처리될 때의 기준점이 만들어집니다.
+
+        """
         self.input_depth_image.update_image(
             depth_ref.colorize_depth(float(self.scale_slider.int_value),
                                      config.depth_min,
@@ -313,6 +336,7 @@ class ReconstructionWindow:
     # Major loop
     def update_main(self):
         depth_file_names, color_file_names = load_rgbd_file_names(self.config)
+        # intrinsic: intrinsic_matrix Tensor
         intrinsic = load_intrinsic(self.config)
 
         n_files = len(color_file_names)
@@ -336,7 +360,7 @@ class ReconstructionWindow:
 
         gui.Application.instance.post_to_main_thread(
             self.window, lambda: self.init_render(depth_ref, color_ref))
-
+        # TODO: 여기서부터
         fps_interval_len = 30
         self.idx = 0
         pcd = None

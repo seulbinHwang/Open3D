@@ -20,6 +20,7 @@ import json
 from enum import IntEnum
 
 import sys
+
 sys.path.append(abspath(__file__))
 from realsense_helper import get_profiles
 
@@ -55,6 +56,7 @@ def save_intrinsic_as_json(filename, frame):
     """카메라의 내부 보정 정보를 JSON 파일로 저장합니다. """
     intrinsics = frame.profile.as_video_stream_profile().intrinsics
     with open(filename, 'w') as outfile:
+        # TODO: depth_scale 도 저장해야 하는지?
         obj = json.dump(
             {
                 'width':
@@ -73,20 +75,38 @@ def save_intrinsic_as_json(filename, frame):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="Realsense Recorder. Please select one of the optional arguments")
+        description=
+        "Realsense Recorder. Please select one of the optional arguments")
 
     # 기존 인자 파서 부분에 추가
-    parser.add_argument("--output_folder", default='../dataset/realsense/', help="set output folder")
-    parser.add_argument("--record_rosbag", action='store_true', help="Recording rgbd stream into realsense.bag")
-    parser.add_argument("--record_imgs", action='store_true',
-                        help="Recording save color and depth images into realsense folder")
-    parser.add_argument("--playback_rosbag", action='store_true', help="Play recorded realsense.bag file")
+    parser.add_argument("--output_folder",
+                        default='../dataset/realsense/',
+                        help="set output folder")
+    parser.add_argument("--record_rosbag",
+                        action='store_true',
+                        help="Recording rgbd stream into realsense.bag")
+    parser.add_argument(
+        "--record_imgs",
+        action='store_true',
+        help="Recording save color and depth images into realsense folder")
+    parser.add_argument("--playback_rosbag",
+                        action='store_true',
+                        help="Play recorded realsense.bag file")
 
     # 새로운 인자 추가: 해상도 및 프레임 속도 설정
-    parser.add_argument("--width", type=int, default=640, help="Width of the frames")
-    parser.add_argument("--height", type=int, default=480, help="Height of the frames")
+    parser.add_argument("--width",
+                        type=int,
+                        default=640,
+                        help="Width of the frames")
+    parser.add_argument("--height",
+                        type=int,
+                        default=480,
+                        help="Height of the frames")
     parser.add_argument("--fps", type=int, default=30, help="Frames per second")
-    parser.add_argument("--max_depth", type=float, default=3.0, help="Maximum depth value in meters to trust")
+    parser.add_argument("--max_depth",
+                        type=float,
+                        default=3.0,
+                        help="Maximum depth value in meters to trust")
     args = parser.parse_args()
     # if sum(o is not False for o in vars(args).values()) != 2:
     #     parser.print_help()
@@ -130,10 +150,12 @@ if __name__ == "__main__":
         # w, h, fps, fmt = color_profiles[0]
         # config.enable_stream(rs.stream.color, w, h, fmt, fps)
         # 깊이 스트림 설정
-        config.enable_stream(rs.stream.depth, args.width, args.height, rs.format.z16, args.fps)
+        config.enable_stream(rs.stream.depth, args.width, args.height,
+                             rs.format.z16, args.fps)
 
         # 컬러 스트림 설정
-        config.enable_stream(rs.stream.color, args.width, args.height, rs.format.bgr8, args.fps)
+        config.enable_stream(rs.stream.color, args.width, args.height,
+                             rs.format.bgr8, args.fps)
 
         if args.record_rosbag:
             config.enable_record_to_file(path_bag)
