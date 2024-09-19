@@ -75,7 +75,7 @@ def integrate(depth_file_names, color_file_names, intrinsic, extrinsics,
         o3d.core.cuda.synchronize()
         end = time.time()
 
-        # Now project them to the depth and find association
+        # Now project them to the depth and find association.
         # (3, N) -> (2, N)
         start = time.time()
         extrinsic_dev = extrinsic.to(device, o3c.float32)
