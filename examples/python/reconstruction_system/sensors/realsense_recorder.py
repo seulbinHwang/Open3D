@@ -135,7 +135,7 @@ if __name__ == "__main__":
     #  different resolutions of color and depth streams
     config = rs.config()
 
-    # color_profiles, depth_profiles = get_profiles()
+    color_profiles, depth_profiles = get_profiles()
 
     if args.record_imgs or args.record_rosbag:
         # 참고: 640 x 480의 깊이 해상도를 사용하면 부드러운 깊이 경계를 생성할 수 있습니다.
@@ -161,29 +161,7 @@ if __name__ == "__main__":
             config.enable_record_to_file(path_bag)
     if args.playback_rosbag:
         config.enable_device_from_file(path_bag, repeat_playback=True)
-    ##############################
-    context = rs.context()
-    while True:
-        connected_devices = [d for d in context.query_devices()]
-        print(f"Found {len(connected_devices)} devices")
-        usb_port_id = '4-1'
-        selected_device = None
-        for device in connected_devices:
-            if device.get_info(rs.camera_info.physical_port) == usb_port_id:
-                selected_device = device
-                print(
-                    f"Device {device.get_info(rs.camera_info.name)} found at {usb_port_id}"
-                )
 
-        if selected_device is None:
-            print("No device found at the specified USB port.")
-        else:
-            print("Device found")
-            break
-
-    config.enable_device(selected_device.get_info(rs.camera_info.serial_number))
-
-    ##############################
     # Start streaming
     profile = pipeline.start(config)
     depth_sensor = profile.get_device().first_depth_sensor()
@@ -195,11 +173,12 @@ if __name__ == "__main__":
     # Getting the depth sensor's depth scale (see rs-align example for explanation)
     depth_scale = depth_sensor.get_depth_scale()
     print("depth_scale: ", depth_scale)
+    raise Exception("Stop here")
 
     # We will not display the background of objects more than
     #  clipping_distance_in_meters meters away
-    # clipping_distance_in_meters = args.max_depth  # 3 meter
-    # clipping_distance = clipping_distance_in_meters / depth_scale
+    clipping_distance_in_meters = args.max_depth  # 3 meter
+    clipping_distance = clipping_distance_in_meters / depth_scale
 
     # Create an align object
     # rs.align allows us to perform alignment of depth frames to others frames
@@ -240,24 +219,24 @@ if __name__ == "__main__":
                 print("Saved color + depth image %06d" % frame_count)
                 frame_count += 1
 
-            # # Remove background - Set pixels further than clipping_distance to grey
-            # grey_color = 153
-            # #depth image is 1 channel, color is 3 channels
-            # depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
-            # bg_removed = np.where((depth_image_3d > clipping_distance) | \
-            #         (depth_image_3d <= 0), grey_color, color_image)
-            #
-            # # Render images
-            # depth_colormap = cv2.applyColorMap(
-            #     cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
-            # images = np.hstack((bg_removed, depth_colormap))
-            # cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
-            # cv2.imshow('Recorder Realsense', images)
-            # key = cv2.waitKey(1)
-            #
-            # # if 'esc' button pressed, escape loop and exit program
-            # if key == 27:
-            #     cv2.destroyAllWindows()
-            #     break
+            # Remove background - Set pixels further than clipping_distance to grey
+            grey_color = 153
+            #depth image is 1 channel, color is 3 channels
+            depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
+            bg_removed = np.where((depth_image_3d > clipping_distance) | \
+                    (depth_image_3d <= 0), grey_color, color_image)
+
+            # Render images
+            depth_colormap = cv2.applyColorMap(
+                cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
+            images = np.hstack((bg_removed, depth_colormap))
+            cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('Recorder Realsense', images)
+            key = cv2.waitKey(1)
+
+            # if 'esc' button pressed, escape loop and exit program
+            if key == 27:
+                cv2.destroyAllWindows()
+                break
     finally:
         pipeline.stop()
