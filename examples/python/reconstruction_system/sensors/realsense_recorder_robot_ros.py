@@ -23,6 +23,7 @@ import traceback
 from rclpy.node import Node
 from realsense2_camera_msgs.msg import RGBD
 from sensor_msgs.msg import CompressedImage, CameraInfo
+import re
 
 sys.path.append(abspath(__file__))
 
@@ -163,8 +164,11 @@ class RealsenseNode(Node):
             usb_port_id = '10-4' #'4-1'
             selected_device = None
             for device in connected_devices:
-                print("device.get_info(rs.camera_info.physical_port):", device.get_info(rs.camera_info.physical_port))
-                if device.get_info(rs.camera_info.physical_port) == usb_port_id:
+                physical_port = device.get_info(rs.camera_info.physical_port)
+                print("physical_port:", device.get_info(rs.camera_info.physical_port))
+                port_id = self.extract_port_id(physical_port)
+                print("port_id:", port_id)
+                if device.get_info(port_id) == usb_port_id:
                     selected_device = device
                     print(
                         f"Device {device.get_info(rs.camera_info.name)} found at {usb_port_id}"
@@ -273,6 +277,13 @@ class RealsenseNode(Node):
         finally:
             pipeline.stop()
 
+    # Function to extract the port ID from the physical port path
+    @staticmethod
+    def extract_port_id(physical_port):
+        match = re.search(r'usb[\d]+/([\d-]+)', physical_port)
+        if match:
+            return match.group(1)
+        return None
 
 if __name__ == "__main__":
     main()
