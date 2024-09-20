@@ -163,6 +163,7 @@ class RealsenseNode(Node):
             usb_port_id = '10-4' #'4-1'
             selected_device = None
             for device in connected_devices:
+                print("device.get_info(rs.camera_info.physical_port):", device.get_info(rs.camera_info.physical_port))
                 if device.get_info(rs.camera_info.physical_port) == usb_port_id:
                     selected_device = device
                     print(
