@@ -173,7 +173,6 @@ if __name__ == "__main__":
     # Getting the depth sensor's depth scale (see rs-align example for explanation)
     depth_scale = depth_sensor.get_depth_scale()
     print("depth_scale: ", depth_scale)
-    raise Exception("Stop here")
 
     # We will not display the background of objects more than
     #  clipping_distance_in_meters meters away

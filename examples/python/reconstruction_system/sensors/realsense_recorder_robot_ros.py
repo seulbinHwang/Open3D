@@ -173,11 +173,10 @@ class RealsenseNode(Node):
                     print(
                         f"Device {device.get_info(rs.camera_info.name)} found at {usb_port_id}"
                     )
-
+                    break
             if selected_device is None:
                 print("No device found at the specified USB port.")
             else:
-                print("Device found")
                 break
 
         config.enable_device(
@@ -204,7 +203,6 @@ class RealsenseNode(Node):
         align = rs.align(align_to)
 
         # Streaming loop
-        frame_count = 0
         try:
             while True:
                 # Get frameset of color and depth
