@@ -239,7 +239,7 @@ class RealsenseNode(Node):
                     rgb_camera_info.width = color_image.shape[1]
                     intrinsics = color_frame.profile.as_video_stream_profile(
                     ).intrinsics
-                    rgb_camera_info.K = [
+                    rgb_camera_info.k = [
                         intrinsics.fx, 0, intrinsics.ppx, 0, intrinsics.fy,
                         intrinsics.ppy, 0, 0, 1
                     ]
@@ -253,7 +253,7 @@ class RealsenseNode(Node):
                     depth_camera_info.width = depth_image.shape[1]
                     intrinsics = aligned_depth_frame.profile.as_video_stream_profile(
                     ).intrinsics
-                    depth_camera_info.K = [
+                    depth_camera_info.k = [
                         intrinsics.fx, 0, intrinsics.ppx, 0, intrinsics.fy,
                         intrinsics.ppy, 0, 0, 1
                     ]
