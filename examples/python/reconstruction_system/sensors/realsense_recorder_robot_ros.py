@@ -89,7 +89,8 @@ def main():
                         help="Recording rgbd stream into realsense.bag")
     parser.add_argument(
         "--record_imgs",
-        action='store_true',
+        type = bool,
+        default = True,
         help="Recording save color and depth images into realsense folder")
     parser.add_argument("--playback_rosbag",
                         action='store_true',
