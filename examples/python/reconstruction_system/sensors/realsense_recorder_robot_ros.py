@@ -204,9 +204,11 @@ class RealsenseNode(Node):
 
         # Streaming loop
         try:
+            frame_count = 0
             while True:
                 # Get frameset of color and depth
                 frames = pipeline.wait_for_frames()
+                print("frame_count:", frame_count)
 
                 # Align the depth frame to color frame
                 aligned_frames = align.process(frames)
@@ -271,7 +273,7 @@ class RealsenseNode(Node):
                     # cv2.imwrite("%s/%06d.jpg" % \
                     #         (path_color, frame_count), color_image)
                     # print("Saved color + depth image %06d" % frame_count)
-                    # frame_count += 1
+                    frame_count += 1
         finally:
             pipeline.stop()
 
