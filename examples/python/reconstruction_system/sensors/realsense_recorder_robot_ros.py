@@ -24,6 +24,7 @@ from rclpy.node import Node
 from realsense2_camera_msgs.msg import RGBD
 from sensor_msgs.msg import CompressedImage, CameraInfo
 import re
+from cv_bridge import CvBridge
 
 sys.path.append(abspath(__file__))
 
@@ -133,6 +134,7 @@ class RealsenseNode(Node):
 
     def __init__(self, args: argparse.Namespace):
         super().__init__('ros2_bridge')
+        self.bridge = CvBridge()
         self.publisher = self.create_publisher(RGBD, '/realsense0/rgbd', 10)
         path_output = args.output_folder
         path_depth = join(args.output_folder, "depth")
