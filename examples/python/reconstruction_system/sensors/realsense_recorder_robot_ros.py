@@ -160,7 +160,7 @@ class RealsenseNode(Node):
         while True:
             connected_devices = [d for d in context.query_devices()]
             print(f"Found {len(connected_devices)} devices")
-            usb_port_id = '4-1'
+            usb_port_id = '10-4' #'4-1'
             selected_device = None
             for device in connected_devices:
                 if device.get_info(rs.camera_info.physical_port) == usb_port_id:
