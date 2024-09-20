@@ -240,8 +240,8 @@ class RealsenseNode(Node):
                     intrinsics = color_frame.profile.as_video_stream_profile(
                     ).intrinsics
                     rgb_camera_info.k = [
-                        intrinsics.fx, 0, intrinsics.ppx, 0, intrinsics.fy,
-                        intrinsics.ppy, 0, 0, 1
+                        intrinsics.fx, 0., intrinsics.ppx, 0., intrinsics.fy,
+                        intrinsics.ppy, 0., 0., 1.
                     ]
                     rgb_camera_info.height = color_image.shape[0]
                     rgb_camera_info.width = color_image.shape[1]
@@ -254,8 +254,8 @@ class RealsenseNode(Node):
                     intrinsics = aligned_depth_frame.profile.as_video_stream_profile(
                     ).intrinsics
                     depth_camera_info.k = [
-                        intrinsics.fx, 0, intrinsics.ppx, 0, intrinsics.fy,
-                        intrinsics.ppy, 0, 0, 1
+                        intrinsics.fx, 0., intrinsics.ppx, 0., intrinsics.fy,
+                        intrinsics.ppy, 0., 0., 1.
                     ]
                     rgbd_msg.depth_camera_info = depth_camera_info
 
