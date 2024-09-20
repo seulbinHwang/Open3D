@@ -262,7 +262,7 @@ class RealsenseNode(Node):
                     rgbd_msg.depth_camera_info = depth_camera_info
 
                     ## depth, color image
-                    rgbd_msg.depth = self.bridge.cv2_to_imgmsg(depth_image,
+                    rgbd_msg.rgb = self.bridge.cv2_to_imgmsg(depth_image,
                                                                encoding='16UC1')
                     rgbd_msg.color = self.bridge.cv2_to_imgmsg(color_image,
                                                                encoding='rgb8')
